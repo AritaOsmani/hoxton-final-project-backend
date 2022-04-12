@@ -123,6 +123,104 @@ app.get('/images', async (req, res) => {
     }
 })
 
+app.patch('/follow', async (req, res) => {
+    const token = req.headers.authorization || ''
+    const { username } = req.body
+    try {
+        const user = await getUserFromToken(token)
+        if (user) {
+            const newFollowing = await prisma.user.update({
+                where: { id: user.id }, data: {
+                    following: {
+                        connect: {
+                            username: username
+                        }
+                    }
+                },
+                include: { following: true }
+            })
+
+            res.status(200).send(newFollowing)
+
+        } else {
+            res.status(400).send({ error: 'Invalid token' })
+        }
+
+    } catch (err) {
+        //@ts-ignore
+        res.status(400).send({ error: err.message })
+    }
+})
+
+app.patch('/unfollow', async (req, res) => {
+    const token = req.headers.authorization || ''
+    const { username } = req.body
+    try {
+        const user = await getUserFromToken(token)
+        if (user) {
+            const unfollow = await prisma.user.update({
+                where: { id: user.id }, data: {
+                    following: {
+                        disconnect: { username }
+                    }
+                },
+                include: { following: true }
+            })
+            res.status(200).send({ unfollow })
+        } else {
+            res.status(400).send({ error: 'Invalid token' })
+        }
+
+    } catch (err) {
+        //@ts-ignore
+        res.status(400).send({ error: err.message })
+    }
+})
+
+app.get('/getFollowers', async (req, res) => {
+    const token = req.headers.authorization || ''
+    try {
+        const user = await getUserFromToken(token)
+        if (user) {
+            const userAndFollowers = await prisma.user.findUnique({ where: { id: user.id }, include: { followedBy: true } })
+            if (!userAndFollowers) {
+                return res.status(404).send({ error: 'User not found' })
+            }
+            const followers = userAndFollowers.followedBy
+            res.status(200).send(followers)
+
+        } else {
+            res.status(400).send({ error: 'Invalid token' })
+        }
+
+    } catch (err) {
+        //@ts-ignore
+        res.status(400).send({ error: err.message })
+    }
+})
+
+app.get('/getFollowing', async (req, res) => {
+    const token = req.headers.authorization || ''
+    try {
+        const user = await getUserFromToken(token)
+        if (user) {
+            const userFollowing = await prisma.user.findUnique({ where: { id: user.id }, include: { following: true } })
+            if (!userFollowing) {
+                return res.status(404).send({ error: 'User not found' })
+            }
+            const following = userFollowing.following
+            res.status(200).send(following)
+
+        } else {
+            res.status(400).send({ error: 'Invalid token' })
+        }
+
+    } catch (err) {
+        //@ts-ignore
+        res.status(400).send({ error: err.message })
+    }
+})
+
 app.listen(PORT, () => {
     console.log(`Server runing on: http://localhost:${PORT}/`)
 })
