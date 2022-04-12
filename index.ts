@@ -105,6 +105,24 @@ app.get('/validate', async (req, res) => {
     }
 })
 
+app.get('/images', async (req, res) => {
+    const token = req.headers.authorization || ''
+    try {
+        const user = await getUserFromToken(token)
+        if (user) {
+            const allImages = await prisma.image.findMany({ where: { userId: { not: user.id } }, include: { user: true } })
+            res.status(200).send(allImages)
+
+        } else {
+            res.status(400).send({ erro: 'Invalid token' })
+        }
+
+    } catch (err) {
+        //@ts-ignore
+        res.status(400).send({ error: err.message })
+    }
+})
+
 app.listen(PORT, () => {
     console.log(`Server runing on: http://localhost:${PORT}/`)
 })
