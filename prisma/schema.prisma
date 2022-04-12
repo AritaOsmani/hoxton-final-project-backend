@@ -1,0 +1,74 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int          @id @default(autoincrement())
+  email       String       @unique
+  username    String       @unique
+  name        String
+  password    String
+  avatar      String       @default("https://freepikpsd.com/file/2019/10/default-user-profile-image-png-2-Transparent-Images-300x300.png")
+  following   User[]       @relation("UserFollows", references: [id])
+  followedBy  User[]       @relation("UserFollows", references: [id])
+  searchedFor User[]       @relation("UserSearchedFor", references: [id])
+  searchedBy  User[]       @relation("UserSearchedFor", references: [id])
+  collections Collection[]
+  saved       Saved[]
+  images      Image[]
+}
+
+model Image {
+  id          Int           @id @default(autoincrement())
+  link        String
+  title       String
+  category    String
+  collections Collection[]
+  Saved       Saved[]
+  ImageColors ImageColors[]
+  user        User          @relation(fields: [userId], references: [id])
+  userId      Int
+}
+
+model Collection {
+  id      Int     @id @default(autoincrement())
+  name    String
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  Int
+  images  Image   @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  imageId Int
+  saved   Saved[]
+}
+
+model Saved {
+  id         Int         @id @default(autoincrement())
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  image      Image       @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  collection Collection? @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  userId     Int
+  imageId    Int
+
+  collectionId Int?
+}
+
+model Color {
+  id          Int           @id @default(autoincrement())
+  name        String        @unique
+  ImageColors ImageColors[]
+}
+
+model ImageColors {
+  id      Int   @id @default(autoincrement())
+  color   Color @relation(fields: [colorId], references: [id], onDelete: Cascade)
+  image   Image @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  colorId Int
+  imageId Int
+}
