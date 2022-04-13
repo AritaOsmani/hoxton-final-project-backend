@@ -224,7 +224,7 @@ app.get('/getFollowing', async (req, res) => {
 app.get('/users/:username', async (req, res) => {
     const username = req.params.username
     try {
-        const user = await prisma.user.findUnique({ where: { username }, include: { followedBy: true, following: true } })
+        const user = await prisma.user.findUnique({ where: { username }, include: { followedBy: true, following: true, _count: { select: { followedBy: true, following: true } } } })
         if (user) {
             res.status(200).send(user)
         } else {
