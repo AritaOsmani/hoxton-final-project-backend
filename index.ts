@@ -1,6 +1,6 @@
-import express from 'express'
+import * as express from 'express';
 import { PrismaClient } from '@prisma/client'
-import cors from 'cors'
+import * as cors from 'cors'
 const bcrypt = require("bcryptjs");
 const jwt = require('jsonwebtoken');
 
