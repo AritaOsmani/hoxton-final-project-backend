@@ -221,6 +221,59 @@ app.get('/getFollowing', async (req, res) => {
     }
 })
 
+app.get('/users/:username', async (req, res) => {
+    const username = req.params.username
+    try {
+        const user = await prisma.user.findUnique({ where: { username }, include: { followedBy: true, following: true } })
+        if (user) {
+            res.status(200).send(user)
+        } else {
+            res.status(404).send({ error: 'User not found!' })
+        }
+
+    } catch (err) {
+        //@ts-ignore
+        res.status(400).send({ error: err.message })
+    }
+})
+
+app.get('/images/:userId', async (req, res) => {
+    const userId = Number(req.params.userId)
+    try {
+        const images = await prisma.image.findMany({ where: { userId }, include: { user: true, ImageColors: true, Saved: true, collections: true } })
+        res.status(200).send(images)
+
+    } catch (err) {
+        //@ts-ignore
+        res.status(400).send({ error: err.message })
+    }
+})
+
+app.get('/collections/:userId', async (req, res) => {
+    const userId = Number(req.params.userId)
+    try {
+        const collections = await prisma.collection.findMany({ where: { userId }, include: { images: true, saved: true } })
+        res.status(200).send(collections)
+    } catch (err) {
+        //@ts-ignore
+        res.status(400).send({ error: err.message })
+    }
+})
+
+app.get('/collectionImages/:collectionId', async (req, res) => {
+    const collectionId = Number(req.params.collectionId)
+    try {
+        const collectionAndImages = await prisma.collection.findUnique({ where: { id: collectionId }, include: { images: { include: { user: true } } } })
+        const images = collectionAndImages.images
+        res.status(200).send(images)
+
+    } catch (err) {
+        //@ts-ignore
+        res.status(400).send({ error: err.message })
+    }
+
+})
+
 app.listen(PORT, () => {
     console.log(`Server runing on: http://localhost:${PORT}/`)
 })
