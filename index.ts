@@ -191,7 +191,7 @@ app.patch('/unfollow', async (req, res) => {
 app.get('/getFollowers/:userId', async (req, res) => {
     const userId = Number(req.params.userId)
     try {
-        const userFound = await prisma.user.findUnique({ where: { id: userId }, include: { followedBy: { include: { images: true} }} })
+        const userFound = await prisma.user.findUnique({ where: { id: userId }, include: { followedBy: { include: { images: true } } } })
         if (userFound) {
             const followers = userFound.followedBy
             res.status(200).send(followers)
@@ -210,7 +210,7 @@ app.get('/getFollowing/:userId', async (req, res) => {
 
     const userId = Number(req.params.userId)
     try {
-        const userFound = await prisma.user.findUnique({ where: { id: userId }, include: { following: { include:  { images: true} } } })
+        const userFound = await prisma.user.findUnique({ where: { id: userId }, include: { following: { include: { images: true } } } })
         if (userFound) {
             const following = userFound.following
             res.status(200).send(following)
@@ -301,6 +301,64 @@ app.get('/savedImages/:imageId', async (req, res) => {
     try {
         const savedImages = await prisma.saved.findMany({ where: { imageId }, include: { user: true } })
         res.status(200).send(savedImages.map(saved => saved.user))
+    } catch (err) {
+        //@ts-ignore
+        res.status(400).send({ error: err.message })
+    }
+})
+
+//Save an image 
+app.post('/save', async (req, res) => {
+    const token = req.headers.authorization || ''
+    const { imageId, collectionId } = req.body
+    try {
+        const user = await getUserFromToken(token)
+        if (user) {
+            if (collectionId) {
+                const collectionMatch = await prisma.collection.findUnique({ where: { id: collectionId } })
+                if (collectionMatch) {
+                    const alreadySaved = await prisma.saved.findFirst({ where: { userId: user.id, imageId, collectionId: collectionId } })
+
+                    if (alreadySaved) {
+                        return res.status(400).send({ error: 'You already saved this image' })
+                    } else {
+                        const newSaved = await prisma.saved.create({
+                            data: {
+                                userId: user.id,
+                                imageId: imageId,
+                                collectionId: collectionId
+                            },
+                            include: {
+                                user: true
+                            }
+                        })
+                        res.status(200).send(newSaved)
+                    }
+
+
+                } else {
+                    res.status(404).send({ error: 'Collection not found' })
+                }
+            } else {
+                const alreadySaved = await prisma.saved.findFirst({ where: { userId: user.id, imageId } })
+
+                if (alreadySaved) {
+                    return res.status(400).send({ error: 'You already saved this image' })
+                } else {
+                    const newSaved = await prisma.saved.create({
+                        data: {
+                            userId: user.id,
+                            imageId: imageId
+                        }
+                    })
+                    res.status(200).send(newSaved)
+                }
+            }
+
+        } else {
+            res.status(400).send({ error: 'Invalid token' })
+        }
+
     } catch (err) {
         //@ts-ignore
         res.status(400).send({ error: err.message })
