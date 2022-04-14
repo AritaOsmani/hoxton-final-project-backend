@@ -191,7 +191,7 @@ app.patch('/unfollow', async (req, res) => {
 app.get('/getFollowers/:userId', async (req, res) => {
     const userId = Number(req.params.userId)
     try {
-        const userFound = await prisma.user.findUnique({ where: { id: userId }, include: { followedBy: true } })
+        const userFound = await prisma.user.findUnique({ where: { id: userId }, include: { followedBy: { include: { images: true} }} })
         if (userFound) {
             const followers = userFound.followedBy
             res.status(200).send(followers)
@@ -210,7 +210,7 @@ app.get('/getFollowing/:userId', async (req, res) => {
 
     const userId = Number(req.params.userId)
     try {
-        const userFound = await prisma.user.findUnique({ where: { id: userId }, include: { following: true } })
+        const userFound = await prisma.user.findUnique({ where: { id: userId }, include: { following: { include:  { images: true} } } })
         if (userFound) {
             const following = userFound.following
             res.status(200).send(following)
