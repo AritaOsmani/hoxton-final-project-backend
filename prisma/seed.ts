@@ -80,8 +80,8 @@ const users: Prisma.UserCreateInput[] = [
 
 const images: Prisma.ImageCreateInput[] = [
     {
-        title: 'Cloud',
-        link: 'https://dr.savee-cdn.com/things/6/2/30c8f087a8d9e5bd48ede9.jpg',
+        title: 'Numbers',
+        link: 'https://dr.savee-cdn.com/things/6/2/4ea0c1c8e8d50c47ec9d58.gif',
         category: 'Abstract',
         user: {
             connect: {
@@ -90,9 +90,9 @@ const images: Prisma.ImageCreateInput[] = [
         }
     },
     {
-        title: 'Nike',
-        link: 'https://dr.savee-cdn.com/things/6/2/5425bb970f7c412772a5f9.jpg',
-        category: 'Sport',
+        title: 'Gestura',
+        link: 'https://dr.savee-cdn.com/things/thumbnails/6/2/4f4da3382470053e181c72.jpg',
+        category: 'Art',
         user: {
             connect: {
                 username: 'ilir'
@@ -100,12 +100,113 @@ const images: Prisma.ImageCreateInput[] = [
         }
     },
     {
-        title: 'Walking',
-        link: 'https://dr.savee-cdn.com/things/6/2/4b87ba4b883e51eb848905.jpg',
+        title: 'Modern House',
+        link: 'https://dr.savee-cdn.com/things/thumbnails/6/2/4b8803acfdabf6e8772757.jpg',
         category: 'Nature',
         user: {
             connect: {
                 username: 'adriano'
+            }
+        }
+    },
+    {
+        title: 'Dua Lipa',
+        link: 'https://dr.savee-cdn.com/things/thumbnails/6/2/4da55c3b0b5addef0f4d82.jpg',
+        category: 'Art',
+        user: {
+            connect: {
+                username: 'arita'
+            }
+        }
+    },
+    {
+        title: 'Dark Gray',
+        link: 'https://dr.savee-cdn.com/things/thumbnails/6/2/4c6f813b0b5addef0b36e3.jpg',
+        category: 'Art',
+        user: {
+            connect: {
+                username: 'ilir'
+            }
+        }
+    },
+    {
+        title: 'Saying',
+        link: 'https://dr.savee-cdn.com/things/thumbnails/6/2/4c91ef7839360dc9cb0949.jpg',
+        category: 'Art',
+        user: {
+            connect: {
+                username: 'adriano'
+            }
+        }
+    },
+    {
+        title: 'Pink Mirror',
+        link: 'https://dr.savee-cdn.com/things/thumbnails/6/2/4c830175fffa000d68ddff.jpg',
+        category: 'Art',
+        user: {
+            connect: {
+                username: 'arita'
+            }
+        }
+    },
+    {
+        title: 'Palms and Car',
+        link: 'https://dr.savee-cdn.com/things/thumbnails/6/2/4b87f9acfdabf6e8772675.jpg',
+        category: 'Nature',
+        user: {
+            connect: {
+                username: 'ilir'
+            }
+        }
+    },
+    {
+        title: 'Adidas Shoe',
+        link: 'https://dr.savee-cdn.com/things/thumbnails/6/2/4b87e3acfdabf6e8772568.jpg',
+        category: 'Clothes',
+        user: {
+            connect: {
+                username: 'ilir'
+            }
+        }
+    },
+    {
+        title: 'Girl in nature',
+        link: 'https://dr.savee-cdn.com/things/thumbnails/6/1/e43d8697636ac8f308392b.jpg',
+        category: 'Nature',
+        user: {
+            connect: {
+                username: 'adriano'
+            }
+        }
+    },
+
+    {
+        title: 'Modern Art',
+        link: 'https://dr.savee-cdn.com/things/thumbnails/6/2/4567ac89842e706ba83076.jpg',
+        category: 'Art',
+        user: {
+            connect: {
+                username: 'arita'
+            }
+        }
+    },
+    {
+        title: 'Lifestyle',
+        link: 'https://dr.savee-cdn.com/things/thumbnails/6/1/2a50925b73e2930e8c03a2.jpg',
+        category: 'Nature',
+        user: {
+            connect: {
+                username: 'adriano'
+            }
+        }
+    },
+    {
+        title: 'Orange lifestyle',
+        link: 'https://dr.savee-cdn.com/things/thumbnails/6/2/4389c8010aa3ee61252896.jpg',
+        category: 'Nature',
+        user: {
+            connect: {
+                username: 'ilir'
             }
         }
     },
