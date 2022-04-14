@@ -108,13 +108,19 @@ app.get('/validate', async (req, res) => {
 app.get('/images', async (req, res) => {
     const token = req.headers.authorization || ''
     try {
-        const user = await getUserFromToken(token)
-        if (user) {
-            const allImages = await prisma.image.findMany({ where: { userId: { not: user.id } }, include: { user: true } })
-            res.status(200).send(allImages)
+        if (token) {
+            const user = await getUserFromToken(token)
+            if (user) {
+                const allImages = await prisma.image.findMany({ where: { userId: { not: user.id } }, include: { user: true } })
+                res.status(200).send(allImages)
 
-        } else {
-            res.status(400).send({ erro: 'Invalid token' })
+            } else {
+                res.status(400).send({ erro: 'Invalid token' })
+            }
+        }
+        else {
+            const allImages = await prisma.image.findMany()
+            res.status(200).send(allImages)
         }
 
     } catch (err) {
@@ -271,8 +277,8 @@ app.get('/collectionImages/:collectionId', async (req, res) => {
 app.get('/oneImage/:id', async (req, res) => {
     const id = Number(req.params.id)
     try {
-            const image = await prisma.image.findUnique({ where: { id: id }})
-            res.status(200).send(image)
+        const image = await prisma.image.findUnique({ where: { id: id } })
+        res.status(200).send(image)
     } catch (err) {
         //@ts-ignore
         res.status(400).send({ error: err.message })
