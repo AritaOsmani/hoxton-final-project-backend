@@ -30,6 +30,7 @@ async function getUserFromToken(token: string) {
     return (user)
 }
 
+//Get all users
 app.get('/users', async (req, res) => {
     try {
         const users = await prisma.user.findMany()
@@ -105,6 +106,7 @@ app.get('/validate', async (req, res) => {
     }
 })
 
+//Get all images - if a user is logged in his/her images don't show
 app.get('/images', async (req, res) => {
     const token = req.headers.authorization || ''
     try {
@@ -129,6 +131,7 @@ app.get('/images', async (req, res) => {
     }
 })
 
+//Follow a user
 app.patch('/follow', async (req, res) => {
     const token = req.headers.authorization || ''
     const { username } = req.body
@@ -158,6 +161,7 @@ app.patch('/follow', async (req, res) => {
     }
 })
 
+//Unfollow a user
 app.patch('/unfollow', async (req, res) => {
     const token = req.headers.authorization || ''
     const { username } = req.body
@@ -183,6 +187,7 @@ app.patch('/unfollow', async (req, res) => {
     }
 })
 
+//Get all followers of a user
 app.get('/getFollowers/:userId', async (req, res) => {
     const userId = Number(req.params.userId)
     try {
@@ -200,6 +205,7 @@ app.get('/getFollowers/:userId', async (req, res) => {
     }
 })
 
+//Get all the people a user is following
 app.get('/getFollowing/:userId', async (req, res) => {
 
     const userId = Number(req.params.userId)
@@ -219,6 +225,7 @@ app.get('/getFollowing/:userId', async (req, res) => {
     }
 })
 
+//Get a single user by username
 app.get('/users/:username', async (req, res) => {
     const username = req.params.username
     try {
@@ -235,6 +242,7 @@ app.get('/users/:username', async (req, res) => {
     }
 })
 
+//Get all images of a user
 app.get('/images/:userId', async (req, res) => {
     const userId = Number(req.params.userId)
     try {
@@ -247,6 +255,7 @@ app.get('/images/:userId', async (req, res) => {
     }
 })
 
+//Get all the collections the user has
 app.get('/collections/:userId', async (req, res) => {
     const userId = Number(req.params.userId)
     try {
@@ -258,6 +267,7 @@ app.get('/collections/:userId', async (req, res) => {
     }
 })
 
+//Get the images for a collection
 app.get('/collectionImages/:collectionId', async (req, res) => {
     const collectionId = Number(req.params.collectionId)
     try {
@@ -285,7 +295,7 @@ app.get('/oneImage/:id', async (req, res) => {
     }
 })
 
-
+//Get all the users who saved an image based on the imageId
 app.get('/savedImages/:imageId', async (req, res) => {
     const imageId = Number(req.params.imageId)
     try {
