@@ -365,6 +365,30 @@ app.post('/save', async (req, res) => {
     }
 })
 
+//Get saved images
+app.get('/saved/:username', async (req, res) => {
+    const username = req.params.username
+    try {
+        const user = await prisma.user.findUnique({ where: { username } })
+        if (user) {
+            const allSaved = await prisma.saved.findMany({ where: { userId: user.id }, include: { image: true } })
+            const allSavedImages = []
+            for (const image of allSaved) {
+                allSavedImages.push(image.image)
+            }
+            res.status(200).send(allSavedImages)
+
+        } else {
+            res.status(404).send({ error: 'User not found' })
+        }
+
+    } catch (err) {
+        //@ts-ignore
+        res.status(400).send({ error: err.message })
+    }
+
+})
+
 
 app.listen(PORT, () => {
     console.log(`Server runing on: http://localhost:${PORT}/`)
