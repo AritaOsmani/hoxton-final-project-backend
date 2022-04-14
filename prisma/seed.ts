@@ -25,7 +25,7 @@ const users: Prisma.UserCreateInput[] = [
         email: 'adriano@email.com',
         username: 'adriano',
         password: bcrypt.hashSync('adriano', 8),
-        avatar: 'https://avatars.dicebear.com/api/avataaars/Adriano.svg',
+        avatar: 'https://images.genius.com/afd4d325e2f476aa5cc281aac517e36f.1000x1000x1.png',
 
 
     },
