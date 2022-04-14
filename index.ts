@@ -177,20 +177,15 @@ app.patch('/unfollow', async (req, res) => {
     }
 })
 
-app.get('/getFollowers', async (req, res) => {
-    const token = req.headers.authorization || ''
+app.get('/getFollowers/:userId', async (req, res) => {
+    const userId = Number(req.params.userId)
     try {
-        const user = await getUserFromToken(token)
-        if (user) {
-            const userAndFollowers = await prisma.user.findUnique({ where: { id: user.id }, include: { followedBy: true } })
-            if (!userAndFollowers) {
-                return res.status(404).send({ error: 'User not found' })
-            }
-            const followers = userAndFollowers.followedBy
+        const userFound = await prisma.user.findUnique({ where: { id: userId }, include: { followedBy: true } })
+        if (userFound) {
+            const followers = userFound.followedBy
             res.status(200).send(followers)
-
         } else {
-            res.status(400).send({ error: 'Invalid token' })
+            res.status(400).send({ error: "User not found" })
         }
 
     } catch (err) {
@@ -199,21 +194,18 @@ app.get('/getFollowers', async (req, res) => {
     }
 })
 
-app.get('/getFollowing', async (req, res) => {
-    const token = req.headers.authorization || ''
-    try {
-        const user = await getUserFromToken(token)
-        if (user) {
-            const userFollowing = await prisma.user.findUnique({ where: { id: user.id }, include: { following: true } })
-            if (!userFollowing) {
-                return res.status(404).send({ error: 'User not found' })
-            }
-            const following = userFollowing.following
-            res.status(200).send(following)
+app.get('/getFollowing/:userId', async (req, res) => {
 
+    const userId = Number(req.params.userId)
+    try {
+        const userFound = await prisma.user.findUnique({ where: { id: userId }, include: { following: true } })
+        if (userFound) {
+            const following = userFound.following
+            res.status(200).send(following)
         } else {
-            res.status(400).send({ error: 'Invalid token' })
+            res.status(400).send({ error: "User not found" })
         }
+
 
     } catch (err) {
         //@ts-ignore
