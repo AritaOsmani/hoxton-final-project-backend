@@ -266,6 +266,32 @@ app.get('/collectionImages/:collectionId', async (req, res) => {
 
 })
 
+
+// One Image
+app.get('/oneImage/:id', async (req, res) => {
+    const id = Number(req.params.id)
+    try {
+            const image = await prisma.image.findUnique({ where: { id: id }})
+            res.status(200).send(image)
+    } catch (err) {
+        //@ts-ignore
+        res.status(400).send({ error: err.message })
+    }
+})
+
+
+app.get('/savedImages/:imageId', async (req, res) => {
+    const imageId = Number(req.params.imageId)
+    try {
+        const savedImages = await prisma.saved.findMany({ where: { imageId }, include: { user: true } })
+        res.status(200).send(savedImages.map(saved => saved.user))
+    } catch (err) {
+        //@ts-ignore
+        res.status(400).send({ error: err.message })
+    }
+})
+
+
 app.listen(PORT, () => {
     console.log(`Server runing on: http://localhost:${PORT}/`)
 })
