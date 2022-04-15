@@ -259,7 +259,7 @@ app.get('/images/:userId', async (req, res) => {
 app.get('/collections/:userId', async (req, res) => {
     const userId = Number(req.params.userId)
     try {
-        const collections = await prisma.collection.findMany({ where: { userId }, include: { images: true, saved: true } })
+        const collections = await prisma.collection.findMany({ where: { userId }, include: { saved: { include: { image: true } } } })
         res.status(200).send(collections)
     } catch (err) {
         //@ts-ignore
@@ -271,10 +271,8 @@ app.get('/collections/:userId', async (req, res) => {
 app.get('/collectionImages/:collectionId', async (req, res) => {
     const collectionId = Number(req.params.collectionId)
     try {
-        const collectionAndImages = await prisma.collection.findUnique({ where: { id: collectionId }, include: { images: { include: { user: true } } } })
-        const images = collectionAndImages.images
-        res.status(200).send(images)
-
+        const collection = await prisma.collection.findUnique({ where: { id: collectionId }, include: { saved: { include: { image: true} } } })
+        res.status(200).send(collection)
     } catch (err) {
         //@ts-ignore
         res.status(400).send({ error: err.message })
@@ -392,11 +390,12 @@ app.get('/saved/:username', async (req, res) => {
 //Create a collection
 app.post('/collections', async (req, res) => {
     const token = req.headers.authorization || ''
-    const { imageId, name } = req.body
+    const { name } = req.body
     try {
         const user = await getUserFromToken(token)
         if (user) {
-            const newCollection = await prisma.collection.create({ data: { userId: user.id, imageId, name }, include: { images: true } })
+            //@ts-ignore
+            const newCollection = await prisma.collection.create({ data: { userId: user.id, name }, include: { images: true } })
             res.status(200).send(newCollection)
         } else {
             res.status(400).send({ error: 'Invalid token' })

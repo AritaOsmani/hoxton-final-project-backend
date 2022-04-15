@@ -44,7 +44,7 @@ model Collection {
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId  Int
   images  Image?  @relation(fields: [imageId], references: [id], onDelete: Cascade)
-  imageId Int
+  imageId Int?
   saved   Saved[]
 }
 
