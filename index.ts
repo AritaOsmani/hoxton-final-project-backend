@@ -389,6 +389,24 @@ app.get('/saved/:username', async (req, res) => {
 
 })
 
+//Create a collection
+app.post('/collections', async (req, res) => {
+    const token = req.headers.authorization || ''
+    const { imageId, name } = req.body
+    try {
+        const user = await getUserFromToken(token)
+        if (user) {
+            const newCollection = await prisma.collection.create({ data: { userId: user.id, imageId, name }, include: { images: true } })
+            res.status(200).send(newCollection)
+        } else {
+            res.status(400).send({ error: 'Invalid token' })
+        }
+
+    } catch (err) {
+        //@ts-ignore
+        res.status(400).send({ error: err.message })
+    }
+})
 
 app.listen(PORT, () => {
     console.log(`Server runing on: http://localhost:${PORT}/`)
