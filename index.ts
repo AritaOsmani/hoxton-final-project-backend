@@ -271,7 +271,7 @@ app.get('/collections/:userId', async (req, res) => {
 app.get('/collectionImages/:collectionId', async (req, res) => {
     const collectionId = Number(req.params.collectionId)
     try {
-        const collection = await prisma.collection.findUnique({ where: { id: collectionId }, include: { saved: { include: { image: true} } } })
+        const collection = await prisma.collection.findUnique({ where: { id: collectionId }, include: { saved: { include: { image: true } } } })
         res.status(200).send(collection)
     } catch (err) {
         //@ts-ignore
@@ -394,8 +394,8 @@ app.post('/collections', async (req, res) => {
     try {
         const user = await getUserFromToken(token)
         if (user) {
-            //@ts-ignore
-            const newCollection = await prisma.collection.create({ data: { userId: user.id, name }, include: { images: true } })
+
+            const newCollection = await prisma.collection.create({ data: { userId: user.id, name }, include: { saved: { include: { image: true } } } })
             res.status(200).send(newCollection)
         } else {
             res.status(400).send({ error: 'Invalid token' })
