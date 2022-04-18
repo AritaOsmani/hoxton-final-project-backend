@@ -295,10 +295,17 @@ app.get('/oneImage/:id', async (req, res) => {
 
 //Get all the users who saved an image based on the imageId
 app.get('/savedImages/:imageId', async (req, res) => {
+    const token = req.headers.authorization || ''
     const imageId = Number(req.params.imageId)
     try {
-        const savedImages = await prisma.saved.findMany({ where: { imageId }, include: { user: true } })
-        res.status(200).send(savedImages.map(saved => saved.user))
+        const user = await getUserFromToken(token)
+        if (user) {
+            const savedImages = await prisma.saved.findMany({ where: { imageId, userId: { not: user.id } }, include: { user: true } })
+            res.status(200).send(savedImages.map(saved => saved.user))
+        } else {
+            res.status(400).send({ error: 'Invalid token' })
+        }
+
     } catch (err) {
         //@ts-ignore
         res.status(400).send({ error: err.message })
