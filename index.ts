@@ -414,6 +414,7 @@ app.post('/collections', async (req, res) => {
     }
 })
 
+//Search for a user or image
 app.get('/search', async (req, res) => {
     let q = req.query.q
     let type = req.query.type
@@ -448,6 +449,34 @@ app.get('/search', async (req, res) => {
         }
     } else {
         res.status(400).send({ error: 'No query provided!' })
+    }
+})
+
+//Get suggested accounts
+app.get('/suggested', async (req, res) => {
+    const token = req.headers.authorization || ''
+    try {
+        const user = await getUserFromToken(token)
+        if (user) {
+            let suggested = await prisma.user.findMany({
+                where: {
+                    followedBy: {
+                        none: {
+                            username: user.username
+                        }
+                    }
+                }
+            })
+            suggested = suggested.filter(u => u.id !== user.id)
+            res.status(200).send(suggested)
+
+        } else {
+            res.status(400).send({ error: 'Invalid token' })
+        }
+
+    } catch (err) {
+        //@ts-ignore
+        res.status(400).send({ error: err.message })
     }
 })
 
