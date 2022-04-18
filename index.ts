@@ -414,6 +414,43 @@ app.post('/collections', async (req, res) => {
     }
 })
 
+app.get('/search', async (req, res) => {
+    let q = req.query.q
+    let type = req.query.type
+    if (q) {
+        if (type === undefined) {
+            // const images = await prisma.image.findMany({ where: { title: { contains: q + "" } }, include: { user: true, ImageColors: { include: { color: { select: { name: true } } } } } })
+            const images = await prisma.image.findMany({
+                where: {
+                    ImageColors: {
+                        some: {
+                            color: {
+                                name: q + ""
+                            }
+                        }
+                    }
+                },
+                include: {
+                    user: true
+                }
+            })
+            res.status(200).send(images)
+        }
+
+        if (type === 'items') {
+            const images = await prisma.image.findMany({ where: { title: { contains: q + "" } }, include: { user: true } })
+            return res.status(200).send(images)
+        }
+        if (type === 'users') {
+            const users = await prisma.user.findMany({ where: { OR: [{ username: { contains: q + '' } }, { name: { contains: q + '' } }] } })
+
+            return res.status(200).send(users)
+        }
+    } else {
+        res.status(400).send({ error: 'No query provided!' })
+    }
+})
+
 app.listen(PORT, () => {
     console.log(`Server runing on: http://localhost:${PORT}/`)
 })
