@@ -480,6 +480,27 @@ app.get('/suggested', async (req, res) => {
     }
 })
 
+//Get most popular images
+app.get('/popular', async (req, res) => {
+    try {
+        let popular = await prisma.image.findMany({
+            include: {
+                _count: {
+                    select: {
+                        Saved: true
+                    }
+                }
+            }
+        })
+        popular = popular.filter(p => p._count.Saved > 2)
+        res.status(200).send(popular)
+
+    } catch (err) {
+        //@ts-ignore
+        res.status(400).send({ error: err.message })
+    }
+})
+
 app.listen(PORT, () => {
     console.log(`Server runing on: http://localhost:${PORT}/`)
 })
