@@ -414,6 +414,93 @@ app.post('/collections', async (req, res) => {
     }
 })
 
+//Search for a user or image
+app.get('/search', async (req, res) => {
+    let q = req.query.q
+    let type = req.query.type
+    if (q) {
+        if (type === undefined) {
+            // const images = await prisma.image.findMany({ where: { title: { contains: q + "" } }, include: { user: true, ImageColors: { include: { color: { select: { name: true } } } } } })
+            const images = await prisma.image.findMany({
+                where: {
+                    ImageColors: {
+                        some: {
+                            color: {
+                                name: q + ""
+                            }
+                        }
+                    }
+                },
+                include: {
+                    user: true
+                }
+            })
+            res.status(200).send(images)
+        }
+
+        if (type === 'items') {
+            const images = await prisma.image.findMany({ where: { title: { contains: q + "" } }, include: { user: true } })
+            return res.status(200).send(images)
+        }
+        if (type === 'users') {
+            const users = await prisma.user.findMany({ where: { OR: [{ username: { contains: q + '' } }, { name: { contains: q + '' } }] } })
+
+            return res.status(200).send(users)
+        }
+    } else {
+        res.status(400).send({ error: 'No query provided!' })
+    }
+})
+
+//Get suggested accounts
+app.get('/suggested', async (req, res) => {
+    const token = req.headers.authorization || ''
+    try {
+        const user = await getUserFromToken(token)
+        if (user) {
+            let suggested = await prisma.user.findMany({
+                where: {
+                    followedBy: {
+                        none: {
+                            username: user.username
+                        }
+                    }
+                }
+            })
+            suggested = suggested.filter(u => u.id !== user.id)
+            res.status(200).send(suggested)
+
+        } else {
+            res.status(400).send({ error: 'Invalid token' })
+        }
+
+    } catch (err) {
+        //@ts-ignore
+        res.status(400).send({ error: err.message })
+    }
+})
+
+//Get most popular images
+app.get('/popular', async (req, res) => {
+    try {
+        let popular = await prisma.image.findMany({
+            include: {
+                _count: {
+                    select: {
+                        Saved: true
+                    }
+                }
+            }
+        })
+        popular = popular.filter(p => p._count.Saved > 2)
+        res.status(200).send(popular)
+
+    } catch (err) {
+        //@ts-ignore
+        res.status(400).send({ error: err.message })
+    }
+})
+
 app.listen(PORT, () => {
     console.log(`Server runing on: http://localhost:${PORT}/`)
 })
