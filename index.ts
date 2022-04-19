@@ -259,7 +259,7 @@ app.get('/images/:userId', async (req, res) => {
 app.get('/collections/:userId', async (req, res) => {
     const userId = Number(req.params.userId)
     try {
-        const collections = await prisma.collection.findMany({ where: { userId }, include: { saved: { include: { image: true } } } })
+        const collections = await prisma.collection.findMany({ where: { userId }, include: { saved: { include: { image: true } }, _count: { select: { saved: true } } } })
         res.status(200).send(collections)
     } catch (err) {
         //@ts-ignore
@@ -280,6 +280,30 @@ app.get('/collectionImages/:collectionId', async (req, res) => {
 
 })
 
+//Get collections per image
+app.get('/imageCollections/:imageId', async (req, res) => {
+    const token = req.headers.authorization || ''
+    const imageId = Number(req.params.imageId)
+    try {
+        const user = await getUserFromToken(token)
+        if (user) {
+
+            const match = await prisma.saved.findMany({
+                where: { imageId, userId: user.id }, include:
+                    { collection: { include: { _count: { select: { saved: true } }, saved: { include: { image: true } } } } }
+            })
+            let collections = (match.map(c => c.collection)).filter(c => c !== null)
+            res.status(200).send(collections)
+        } else {
+            res.status(400).send({ error: 'Invalid token' })
+        }
+
+
+    } catch (err) {
+        //@ts-ignore
+        res.status(400).send({ error: err.message })
+    }
+})
 
 // One Image
 app.get('/oneImage/:id', async (req, res) => {
