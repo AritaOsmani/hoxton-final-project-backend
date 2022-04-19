@@ -544,7 +544,12 @@ app.patch('/update', async (req, res) => {
     try {
         const user = await getUserFromToken(token)
         if (user) {
-            const updatedUser = await prisma.user.update({ where: { id: user.id }, data: { name, email, username, password, avatar } })
+            const updatedUser = await prisma.user.update({ where: { id: user.id }, data: { name, email, username, password, avatar: (avatar !== null) ? avatar : user.avatar}, 
+                select: {
+                    id: true, email: true, name: true, username: true, avatar: true,
+                    _count: true, followedBy: true, following: true, images: true, saved: true,
+                    collections: true, searchedBy: true, searchedFor: true
+                } })
             res.status(200).send(updatedUser)
         } else {
             res.status(400).send({ error: 'Invalid token' })
