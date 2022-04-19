@@ -526,6 +526,17 @@ app.get('/popular', async (req, res) => {
     }
 })
 
+//Get all colors
+app.get('/colors', async (req, res) => {
+    try {
+        const colors = await prisma.color.findMany()
+        res.status(200).send(colors)
+    } catch (err) {
+        //@ts-ignore
+        res.status(400).send({ error: err.message })
+    }
+})
+
 app.listen(PORT, () => {
     console.log(`Server runing on: http://localhost:${PORT}/`)
 })
