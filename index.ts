@@ -324,7 +324,7 @@ app.get('/savedImages/:imageId', async (req, res) => {
     try {
         const user = await getUserFromToken(token)
         if (user) {
-            const savedImages = await prisma.saved.findMany({ where: { imageId, userId: { not: user.id } }, include: { user: true } })
+            const savedImages = await prisma.saved.findMany({ where: { imageId, userId: { not: user.id } }, include: { user: true }, distinct: ['userId'] })
             res.status(200).send(savedImages.map(saved => saved.user))
         } else {
             res.status(400).send({ error: 'Invalid token' })
@@ -401,7 +401,7 @@ app.get('/saved/:username', async (req, res) => {
     try {
         const user = await prisma.user.findUnique({ where: { username } })
         if (user) {
-            const allSaved = await prisma.saved.findMany({ where: { userId: user.id }, include: { image: true } })
+            const allSaved = await prisma.saved.findMany({ where: { userId: user.id }, include: { image: true }, distinct: ['imageId'] })
             const allSavedImages = []
             for (const image of allSaved) {
                 allSavedImages.push(image.image)
