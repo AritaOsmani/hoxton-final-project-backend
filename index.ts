@@ -358,7 +358,8 @@ app.post('/save', async (req, res) => {
                                 collectionId: collectionId
                             },
                             include: {
-                                user: true
+                                user: true,
+                                collection: true
                             }
                         })
                         res.status(200).send(newSaved)
