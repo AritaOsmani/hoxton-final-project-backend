@@ -492,9 +492,11 @@ app.get('/suggested', async (req, res) => {
                         }
                     }
                 },
-                select: { id: true, name: true, email: true, username: true, avatar: true, images: true }
+                select: { id: true, name: true, email: true, username: true, avatar: true, images: true, saved: true }
             })
+
             suggested = suggested.filter(u => u.id !== user.id)
+            suggested = suggested.filter(user => user.images.length > 0)
             res.status(200).send(suggested)
 
         } else {
@@ -546,12 +548,7 @@ app.patch('/update', async (req, res) => {
     try {
         const user = await getUserFromToken(token)
         if (user) {
-            // if (username) {
-            //     const alreadyExists = await prisma.user.findUnique({ where: username })
-            //     if (alreadyExists) {
-            //         return res.status(400).send({ error: 'Username already exists!' })
-            //     }
-            // }
+
             if (password) {
                 const hash = bcrypt.hashSync(password, 8)
                 const updatedUser = await prisma.user.update({
