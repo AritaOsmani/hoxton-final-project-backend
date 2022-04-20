@@ -10,7 +10,7 @@ app.use(express.json())
 
 const PORT = process.env.PORT || 4001
 
-const prisma = new PrismaClient({ log: ['query', 'error', 'warn', 'info'] })
+const prisma = new PrismaClient()
 
 function createToken(id: number) {
     return jwt.sign({ id: id }, process.env.MY_SECRET, { expiresIn: '3days' })
@@ -33,8 +33,8 @@ async function getUserFromToken(token: string) {
 //Get all users
 app.get('/users', async (req, res) => {
     try {
-        const users = await prisma.user.findMany( { select: { id: true, name: true, email: true, username: true, avatar: true, images: true } } )
-        const userToSend = users.filter(user => user.images.length > 0 )
+        const users = await prisma.user.findMany({ select: { id: true, name: true, email: true, username: true, avatar: true, images: true } })
+        const userToSend = users.filter(user => user.images.length > 0)
         res.send(userToSend)
     } catch (err) {
         //@ts-ignore
@@ -491,7 +491,8 @@ app.get('/suggested', async (req, res) => {
                             username: user.username
                         }
                     }
-                }
+                },
+                select: { id: true, name: true, email: true, username: true, avatar: true, images: true }
             })
             suggested = suggested.filter(u => u.id !== user.id)
             res.status(200).send(suggested)
@@ -545,13 +546,38 @@ app.patch('/update', async (req, res) => {
     try {
         const user = await getUserFromToken(token)
         if (user) {
-            const updatedUser = await prisma.user.update({ where: { id: user.id }, data: { name, email, username, password, avatar: (avatar !== null) ? avatar : user.avatar}, 
-                select: {
-                    id: true, email: true, name: true, username: true, avatar: true,
-                    _count: true, followedBy: true, following: true, images: true, saved: true,
-                    collections: true, searchedBy: true, searchedFor: true
-                } })
-            res.status(200).send(updatedUser)
+            // if (username) {
+            //     const alreadyExists = await prisma.user.findUnique({ where: username })
+            //     if (alreadyExists) {
+            //         return res.status(400).send({ error: 'Username already exists!' })
+            //     }
+            // }
+            if (password) {
+                const hash = bcrypt.hashSync(password, 8)
+                const updatedUser = await prisma.user.update({
+                    where: { id: user.id }, data: { name, email, username, password: hash, avatar: (avatar !== null) ? avatar : user.avatar },
+                    select: {
+                        id: true, email: true, name: true, username: true, avatar: true,
+                        _count: true, followedBy: true, following: true, images: true, saved: true,
+                        collections: true, searchedBy: true, searchedFor: true
+                    }
+                })
+                res.status(200).send(updatedUser)
+            } else {
+                const updatedUser = await prisma.user.update({
+                    where: { id: user.id }, data: { name, email, username, avatar: (avatar !== null) ? avatar : user.avatar },
+                    select: {
+                        id: true, email: true, name: true, username: true, avatar: true,
+                        _count: true, followedBy: true, following: true, images: true, saved: true,
+                        collections: true, searchedBy: true, searchedFor: true
+                    }
+                })
+                res.status(200).send(updatedUser)
+            }
+
+
+
+
         } else {
             res.status(400).send({ error: 'Invalid token' })
         }
