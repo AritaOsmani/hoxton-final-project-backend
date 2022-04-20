@@ -33,8 +33,9 @@ async function getUserFromToken(token: string) {
 //Get all users
 app.get('/users', async (req, res) => {
     try {
-        const users = await prisma.user.findMany()
-        res.send(users)
+        const users = await prisma.user.findMany( { select: { id: true, name: true, email: true, username: true, avatar: true, images: true } } )
+        const userToSend = users.filter(user => user.images.length > 0 )
+        res.send(userToSend)
     } catch (err) {
         //@ts-ignore
         res.status(400).send(err.message)
