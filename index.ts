@@ -469,7 +469,7 @@ app.get('/search', async (req, res) => {
             return res.status(200).send(images)
         }
         if (type === 'users') {
-            const users = await prisma.user.findMany({ where: { OR: [{ username: { contains: q + '' } }, { name: { contains: q + '' } }] } })
+            const users = await prisma.user.findMany({ where: { OR: [{ username: { contains: q + '' } }, { name: { contains: q + '' } }] }, include: { images: true } })
 
             return res.status(200).send(users)
         }
