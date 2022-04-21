@@ -24,7 +24,7 @@ async function getUserFromToken(token: string) {
         select: {
             id: true, email: true, name: true, username: true, avatar: true,
             _count: true, followedBy: true, following: true, images: true, saved: true,
-            collections: true, searchedBy: true, searchedFor: true
+            collections: true
         }
     })
     return (user)
@@ -56,7 +56,7 @@ app.post('/sign-in', async (req, res) => {
                 select: {
                     id: true, email: true, name: true, username: true, avatar: true,
                     _count: true, followedBy: true, following: true, images: true, saved: true,
-                    collections: true, searchedBy: true, searchedFor: true
+                    collections: true
                 }
             })
             res.send({ user: userToSend, token: createToken(user.id) })
@@ -84,7 +84,7 @@ app.post('/sign-up', async (req, res) => {
             select: {
                 id: true, email: true, name: true, username: true, avatar: true,
                 _count: true, followedBy: true, following: true, images: true, saved: true,
-                collections: true, searchedBy: true, searchedFor: true
+                collections: true
             }
         })
         res.send({ user, token: createToken(user.id) })
@@ -147,7 +147,24 @@ app.patch('/follow', async (req, res) => {
                         }
                     }
                 },
-                include: { following: true }
+                include: {
+                    following: true,
+                    notifFollowSender: true,
+                    notifFollowReceiver: true
+                }
+            })
+            const addNotif = await prisma.user.update({
+                where: { id: user.id }, data: {
+                    notifFollowReceiver: {
+                        connect: {
+                            username: username
+                        }
+                    }
+                },
+                include: {
+                    notifFollowSender: true,
+                    notifFollowReceiver: true
+                }
             })
 
             res.status(200).send(newFollowing)
@@ -347,10 +364,11 @@ app.post('/save', async (req, res) => {
             if (collectionId) {
                 const collectionMatch = await prisma.collection.findUnique({ where: { id: collectionId } })
                 if (collectionMatch) {
-                    const alreadySaved = await prisma.saved.findFirst({ where: { userId: user.id, imageId, collectionId: collectionId } })
+                    const alreadySaved = await prisma.saved.findFirst({ where: { userId: user.id, imageId, collectionId: collectionId }, include: { image: true } })
 
                     if (alreadySaved) {
                         return res.status(400).send({ error: 'You already saved this image' })
+
                     } else {
                         const newSaved = await prisma.saved.create({
                             data: {
@@ -363,6 +381,8 @@ app.post('/save', async (req, res) => {
                                 collection: true
                             }
                         })
+                        const addSavedNotif = await prisma.savedImageNotif.create({ data: { receiverId: alreadySaved.image.userId, senderId: user.id, imageId: newSaved.imageId } })
+                        console.log('addSaved: ', addSavedNotif)
                         res.status(200).send(newSaved)
                     }
 
@@ -371,9 +391,10 @@ app.post('/save', async (req, res) => {
                     res.status(404).send({ error: 'Collection not found' })
                 }
             } else {
-                const alreadySaved = await prisma.saved.findFirst({ where: { userId: user.id, imageId } })
+                const alreadySaved = await prisma.saved.findFirst({ where: { userId: user.id, imageId }, include: { image: true } })
 
                 if (alreadySaved) {
+
                     return res.status(400).send({ error: 'You already saved this image' })
                 } else {
                     const newSaved = await prisma.saved.create({
@@ -382,6 +403,8 @@ app.post('/save', async (req, res) => {
                             imageId: imageId
                         }
                     })
+                    const addSavedNotif = await prisma.savedImageNotif.create({ data: { receiverId: alreadySaved.image.userId, senderId: user.id, imageId: newSaved.imageId } })
+                    console.log('addSaved: ', addSavedNotif)
                     res.status(200).send(newSaved)
                 }
             }
@@ -556,7 +579,7 @@ app.patch('/update', async (req, res) => {
                     select: {
                         id: true, email: true, name: true, username: true, avatar: true,
                         _count: true, followedBy: true, following: true, images: true, saved: true,
-                        collections: true, searchedBy: true, searchedFor: true
+                        collections: true
                     }
                 })
                 res.status(200).send(updatedUser)
@@ -566,7 +589,7 @@ app.patch('/update', async (req, res) => {
                     select: {
                         id: true, email: true, name: true, username: true, avatar: true,
                         _count: true, followedBy: true, following: true, images: true, saved: true,
-                        collections: true, searchedBy: true, searchedFor: true
+                        collections: true
                     }
                 })
                 res.status(200).send(updatedUser)
