@@ -348,9 +348,10 @@ app.post('/save', async (req, res) => {
                 const collectionMatch = await prisma.collection.findUnique({ where: { id: collectionId } })
                 if (collectionMatch) {
                     const alreadySaved = await prisma.saved.findFirst({ where: { userId: user.id, imageId, collectionId: collectionId } })
+                    const belongsToUser = await prisma.image.findFirst({ where: { userId: user.id, id: imageId } })
 
-                    if (alreadySaved) {
-                        return res.status(400).send({ error: 'You already saved this image' })
+                    if (alreadySaved || belongsToUser) {
+                        return res.status(400).send({ error: 'You already saved this image or belongs to you' })
                     } else {
                         const newSaved = await prisma.saved.create({
                             data: {
@@ -372,9 +373,9 @@ app.post('/save', async (req, res) => {
                 }
             } else {
                 const alreadySaved = await prisma.saved.findFirst({ where: { userId: user.id, imageId } })
-
-                if (alreadySaved) {
-                    return res.status(400).send({ error: 'You already saved this image' })
+                const belongsToUser = await prisma.image.findFirst({ where: { userId: user.id, id: imageId } })
+                if (alreadySaved || belongsToUser) {
+                    return res.status(400).send({ error: 'You already saved this image or belongs to you' })
                 } else {
                     const newSaved = await prisma.saved.create({
                         data: {
@@ -579,6 +580,33 @@ app.patch('/update', async (req, res) => {
             res.status(400).send({ error: 'Invalid token' })
         }
 
+
+    } catch (err) {
+        //@ts-ignore
+        res.status(400).send({ error: err.message })
+    }
+})
+
+//Create an image
+app.post('/images', async (req, res) => {
+    const token = req.headers.authorization || ''
+    const { title, link, category = '' } = req.body;
+    try {
+        const user = await getUserFromToken(token)
+        if (user) {
+            const newImage = await prisma.image.create({
+                data: {
+                    title,
+                    link,
+                    category,
+                    userId: user.id
+                },
+                include: { Saved: true, collections: true, ImageColors: true, user: true, _count: { select: { Saved: true } } }
+            })
+            res.status(200).send(newImage)
+        } else {
+            res.status(400).send({ error: 'Invalid token' })
+        }
 
     } catch (err) {
         //@ts-ignore
