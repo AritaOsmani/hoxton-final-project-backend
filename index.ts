@@ -24,7 +24,7 @@ async function getUserFromToken(token: string) {
         select: {
             id: true, email: true, name: true, username: true, avatar: true,
             _count: true, followedBy: true, following: true, images: true, saved: true,
-            collections: true, searchedBy: true, searchedFor: true
+            collections: true
         }
     })
     return (user)
@@ -56,7 +56,7 @@ app.post('/sign-in', async (req, res) => {
                 select: {
                     id: true, email: true, name: true, username: true, avatar: true,
                     _count: true, followedBy: true, following: true, images: true, saved: true,
-                    collections: true, searchedBy: true, searchedFor: true
+                    collections: true
                 }
             })
             res.send({ user: userToSend, token: createToken(user.id) })
@@ -84,7 +84,7 @@ app.post('/sign-up', async (req, res) => {
             select: {
                 id: true, email: true, name: true, username: true, avatar: true,
                 _count: true, followedBy: true, following: true, images: true, saved: true,
-                collections: true, searchedBy: true, searchedFor: true
+                collections: true
             }
         })
         res.send({ user, token: createToken(user.id) })
@@ -556,7 +556,7 @@ app.patch('/update', async (req, res) => {
                     select: {
                         id: true, email: true, name: true, username: true, avatar: true,
                         _count: true, followedBy: true, following: true, images: true, saved: true,
-                        collections: true, searchedBy: true, searchedFor: true
+                        collections: true
                     }
                 })
                 res.status(200).send(updatedUser)
@@ -566,7 +566,7 @@ app.patch('/update', async (req, res) => {
                     select: {
                         id: true, email: true, name: true, username: true, avatar: true,
                         _count: true, followedBy: true, following: true, images: true, saved: true,
-                        collections: true, searchedBy: true, searchedFor: true
+                        collections: true
                     }
                 })
                 res.status(200).send(updatedUser)
